@@ -1,0 +1,10 @@
+﻿name: ForceItemPlugin
+version: 1.0
+main: de.samuel.ForceItemPlugin
+api-version: 1.21
+author: Samuel
+description: Force Item Battle
+commands:
+  timer:
+    description: Controls the timer
+    usage: /timer <start|reset|stop>

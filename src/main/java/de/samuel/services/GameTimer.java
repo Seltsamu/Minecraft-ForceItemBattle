@@ -1,45 +1,34 @@
 package de.samuel.services;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public final class GameTimer {
 
-    private boolean isStoppedByCommand;
-    private final JavaPlugin plugin;
+    private final Plugin plugin;
+    private final GameManager gameManager;
     private BukkitRunnable timerTask;
-    private int currentTime;
+    private int currentTime = 0;
 
-    public GameTimer(JavaPlugin plugin) {
+    public GameTimer(Plugin plugin, GameManager gameManager) {
         this.plugin = plugin;
-        currentTime = plugin.getConfig().getInt("timeElapsed", 0);
-        isStoppedByCommand = plugin.getConfig().getBoolean("timerIsStoppedByCommand");
+        this.gameManager = gameManager;
     }
 
-    public boolean isNotStoppedByCommand(){
-        return !isStoppedByCommand;
-    }
-
-    public void setStoppedByCommand(boolean value){
-        isStoppedByCommand = value;
-        plugin.getConfig().set("timerIsStoppedByCommand", value);
-        plugin.saveConfig();
-    }
-
-    public void setCurrentTime(int value){
-        currentTime = value;
-        plugin.getConfig().set("timeElapsed", value);
-        plugin.saveConfig();
-    }
-
-    public void start() {
+    public void start(int startTime) {
 
         if (timerTask != null) return;
+
+        currentTime = startTime;
 
         timerTask = new BukkitRunnable() {
             @Override
             public void run() {
+
+                if (currentTime == 0) {
+                    gameManager.stopGame();
+                }
 
                 int seconds = currentTime % 60;
                 int minutes = (currentTime % 3600) / 60;
@@ -48,7 +37,7 @@ public final class GameTimer {
 
                 Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar(formattedTime));
 
-                currentTime++;
+                currentTime--;
             }
         };
 
@@ -58,23 +47,9 @@ public final class GameTimer {
     public void stop() {
         if (timerTask != null) {
             timerTask.cancel();
-            timerTask = null;
-            saveCurrentTime();
-        }
-    }
-
-    public void reset() {
-        if (timerTask != null) {
+            Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar("Game ended"));
             currentTime = 0;
-            timerTask.cancel();
             timerTask = null;
-            saveCurrentTime();
         }
-    }
-
-    private void saveCurrentTime() {
-        plugin.getConfig().set("timeElapsed", currentTime);
-        plugin.saveConfig();
-        isStoppedByCommand = false;
     }
 }

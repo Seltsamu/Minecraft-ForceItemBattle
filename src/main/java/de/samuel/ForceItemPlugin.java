@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public final class ForceItemPlugin extends JavaPlugin {
 
     private final Logger logger = getLogger();
-    private final GameManager gameManager = new GameManager(logger);
+    private final GameManager gameManager = new GameManager(logger, this);
 
     @Override
     public void onEnable() {

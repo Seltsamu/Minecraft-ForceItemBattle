@@ -1,5 +1,6 @@
 package de.samuel;
 
+import de.samuel.commands.FIBCommand;
 import de.samuel.listeners.ItemPickupListener;
 import de.samuel.listeners.PlayerJoinListener;
 import de.samuel.services.GameManager;
@@ -19,6 +20,8 @@ public final class ForceItemPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(gameManager), this);
         getServer().getPluginManager().registerEvents(new ItemPickupListener(gameManager), this);
+
+        Objects.requireNonNull(getCommand("fib")).setExecutor(new FIBCommand(gameManager));
     }
 
     @Override

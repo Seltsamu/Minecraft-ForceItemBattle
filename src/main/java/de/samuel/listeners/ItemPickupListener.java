@@ -8,14 +8,14 @@ import org.jspecify.annotations.NonNull;
 
 public class ItemPickupListener implements Listener {
 
-    private GameManager gm;
+    private final GameManager gameManager;
 
-    public ItemPickupListener(GameManager gm) {
-        this.gm = gm;
+    public ItemPickupListener(GameManager gameManager) {
+        this.gameManager = gameManager;
     }
 
     @EventHandler
     public void OnItemPickup(@NonNull PlayerPickupItemEvent event) {
-        gm.handleItemPickup(event.getItem().getItemStack(), event.getPlayer());
+        gameManager.handleItemPickup(event.getItem().getItemStack(), event.getPlayer());
     }
 }

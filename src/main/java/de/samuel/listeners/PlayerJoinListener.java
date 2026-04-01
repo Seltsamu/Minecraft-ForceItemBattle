@@ -8,14 +8,14 @@ import org.jspecify.annotations.NonNull;
 
 public class PlayerJoinListener implements Listener {
 
-    private GameManager gm;
+    private final GameManager gameManager;
 
-    public PlayerJoinListener(GameManager gm) {
-        this.gm = gm;
+    public PlayerJoinListener(GameManager gameManager) {
+        this.gameManager = gameManager;
     }
 
     @EventHandler
     public void onJoin(@NonNull PlayerJoinEvent event) {
-        gm.handlePlayerJoin(event.getPlayer());
+        gameManager.handlePlayerJoin(event.getPlayer());
     }
 }

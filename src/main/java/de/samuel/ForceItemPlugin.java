@@ -1,8 +1,10 @@
 package de.samuel;
 
 import de.samuel.commands.FIBCommand;
+import de.samuel.listeners.BlockPlaceListener;
 import de.samuel.listeners.ItemPickupListener;
 import de.samuel.listeners.PlayerJoinListener;
+import de.samuel.listeners.SkipItemListener;
 import de.samuel.services.GameManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,6 +22,8 @@ public final class ForceItemPlugin extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(gameManager), this);
         getServer().getPluginManager().registerEvents(new ItemPickupListener(gameManager), this);
+        getServer().getPluginManager().registerEvents(new SkipItemListener(this, gameManager), this);
+        getServer().getPluginManager().registerEvents(new BlockPlaceListener(this), this);
 
         Objects.requireNonNull(getCommand("fib")).setExecutor(new FIBCommand(gameManager));
     }

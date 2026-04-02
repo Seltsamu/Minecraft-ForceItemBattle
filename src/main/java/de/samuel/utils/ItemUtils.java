@@ -1,4 +1,4 @@
-package de.samuel.util;
+package de.samuel.utils;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

@@ -16,6 +16,6 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onJoin(@NonNull PlayerJoinEvent event) {
-        gameManager.handlePlayerJoin(event.getPlayer());
+        gameManager.AddPlayerToProgressMap(event.getPlayer());
     }
 }

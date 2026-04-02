@@ -4,6 +4,7 @@ import de.samuel.services.GameManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
 public class FIBCommand implements CommandExecutor {
@@ -15,7 +16,7 @@ public class FIBCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String[] args) {
+    public boolean onCommand(@NonNull CommandSender sender, @NonNull Command command, @NonNull String label, String @NonNull [] args) {
 
         if (args.length == 0) {
             sender.sendMessage("Usage: /fib <start|stop>");
@@ -42,6 +43,17 @@ public class FIBCommand implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("stop")) {
             gameManager.stopGame();
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("skipItem")) {
+
+            if (args.length != 2) {
+                sender.sendMessage("Player-name missing");
+                return true;
+            }
+
+            gameManager.skipItem((Player) sender);
             return true;
         }
 

@@ -1,17 +1,17 @@
 package de.samuel.services;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public final class GameTimer {
 
-    private final Plugin plugin;
+    private final JavaPlugin plugin;
     private final GameManager gameManager;
     private BukkitRunnable timerTask;
     private int currentTime = 0;
 
-    public GameTimer(Plugin plugin, GameManager gameManager) {
+    public GameTimer(JavaPlugin plugin, GameManager gameManager) {
         this.plugin = plugin;
         this.gameManager = gameManager;
     }

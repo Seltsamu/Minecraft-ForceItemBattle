@@ -1,5 +1,9 @@
 package de.samuel.services;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,8 +38,11 @@ public final class GameTimer {
                 int minutes = (currentTime % 3600) / 60;
                 int hours = currentTime / 3600;
                 String formattedTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+                TextComponent time = Component.text(formattedTime)
+                        .color(NamedTextColor.BLUE)
+                        .decorate(TextDecoration.BOLD);
 
-                Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar(formattedTime));
+                Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar(time));
 
                 currentTime--;
             }
@@ -47,7 +54,12 @@ public final class GameTimer {
     public void stop() {
         if (timerTask != null) {
             timerTask.cancel();
-            Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar("Game ended"));
+
+            TextComponent text = Component.text("Game ended")
+                    .color(NamedTextColor.BLUE)
+                    .decorate(TextDecoration.BOLD);
+            Bukkit.getOnlinePlayers().forEach(player -> player.sendActionBar(text));
+
             currentTime = 0;
             timerTask = null;
         }

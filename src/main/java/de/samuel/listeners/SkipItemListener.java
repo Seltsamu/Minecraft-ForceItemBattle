@@ -3,7 +3,6 @@ package de.samuel.listeners;
 import de.samuel.services.GameManager;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -48,7 +47,6 @@ public class SkipItemListener implements Listener {
         event.setCancelled(true);
 
         Player player = event.getPlayer();
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
         gameManager.skipItem(player);
 
         item.setAmount(item.getAmount() - 1); // remove one skip item

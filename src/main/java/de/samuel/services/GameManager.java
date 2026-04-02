@@ -1,9 +1,13 @@
 package de.samuel.services;
 
+import de.samuel.ui.ItemDisplayService;
+import de.samuel.ui.MessageService;
+import de.samuel.ui.SoundService;
 import de.samuel.utils.ItemUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -14,7 +18,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
 
-import java.awt.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -22,6 +25,9 @@ public class GameManager {
 
     private final Map<UUID, PlayerProgress> progressMap = new HashMap<>();
     private final ItemGenerator itemGenerator = new ItemGenerator();
+    private final MessageService messageService = new MessageService();
+    private final SoundService soundService = new SoundService();
+    private final ItemDisplayService itemDisplayService = new ItemDisplayService();
     private final Logger logger;
     private boolean gameIsRunning = false;
     private final JavaPlugin plugin;
@@ -38,7 +44,7 @@ public class GameManager {
     }
 
     public void startGame(int startTime) {
-        Bukkit.broadcastMessage("Force Item Battle started");
+        messageService.sendStartMessage();
 
         Collection<? extends Player> players = Bukkit.getOnlinePlayers();
         players.forEach(this::AddPlayerToProgressMap);
@@ -47,7 +53,7 @@ public class GameManager {
             p.completedItems = new ArrayList<>();
             assignNewItem(p);
 
-            Player player = Objects.requireNonNull(Bukkit.getPlayer(u));
+            Player player = getPlayerToProgress(p);
             addItemToPlayerInventory(player, createSkipItem());
         });
 
@@ -58,8 +64,12 @@ public class GameManager {
 
     public void stopGame() {
         timer.stop();
+
+        progressMap.forEach((UUID u, PlayerProgress p) ->
+                itemDisplayService.removeItemBossBar(getPlayerToProgress(p)));
+
         gameIsRunning = false;
-        Bukkit.broadcastMessage("Force Item Battle ended");
+        messageService.sendEndMessage();
     }
 
     public void AddPlayerToProgressMap(@NonNull Player player) {
@@ -75,7 +85,7 @@ public class GameManager {
     }
 
     public void handleItemPickup(@NonNull ItemStack itemStack, @NonNull Player player) {
-        PlayerProgress progress = getPlayerProgress(player);
+        PlayerProgress progress = getProgressToPlayer(player);
         if (gameIsRunning && ItemUtils.isTargetItem(itemStack, progress.currentItem)) {
             playerFoundItem(progress);
         }
@@ -85,7 +95,7 @@ public class GameManager {
         if (!gameIsRunning)
             return;
 
-        PlayerProgress progress = getPlayerProgress(player);
+        PlayerProgress progress = getProgressToPlayer(player);
         ItemStack skippedItem = new ItemStack(progress.currentItem, 1);
 
         logger.info("[ " + player.getName() + "]: skipped item: " + skippedItem.getType().name());
@@ -98,7 +108,12 @@ public class GameManager {
     void playerFoundItem(@NonNull PlayerProgress progress) {
         progress.completedItems.add(progress.currentItem);
 
-        String playerName = Objects.requireNonNull(Bukkit.getPlayer(progress.getPlayerID())).getName();
+        Player player = getPlayerToProgress(progress);
+        messageService.sendItemFoundMessage(player, progress.currentItem);
+
+        soundService.playItemFoundSound(player);
+
+        String playerName = player.getName();
         logger.info("[" + playerName + "]: found his current item");
 
         assignNewItem(progress);
@@ -107,11 +122,14 @@ public class GameManager {
     void assignNewItem(@NonNull PlayerProgress progress) {
         progress.currentItem = itemGenerator.generateItem(progress.completedItems);
 
-        String playerName = Objects.requireNonNull(Bukkit.getPlayer(progress.getPlayerID())).getName();
-        logger.info("[" + playerName + "]: assigned new item: " + progress.currentItem.name());
+        Player player = getPlayerToProgress(progress);
+        Material currentItem = progress.currentItem;
+        itemDisplayService.displayItem(player, currentItem);
+
+        logger.info("[" + player.getName() + "]: assigned new item: " + currentItem.name());
     }
 
-    PlayerProgress getPlayerProgress(@NonNull Player player) {
+    PlayerProgress getProgressToPlayer(@NonNull Player player) {
         UUID playerID = player.getUniqueId();
         if (!progressMap.containsKey(playerID)) {
             logger.info("UUID not found in progressMap");
@@ -121,11 +139,17 @@ public class GameManager {
         return progressMap.get(playerID);
     }
 
+    Player getPlayerToProgress(@NonNull PlayerProgress progress) {
+        return Objects.requireNonNull(Bukkit.getPlayer(progress.getPlayerID()));
+    }
+
     ItemStack createSkipItem() {
         ItemStack skipItem = new ItemStack(Material.BARRIER, 5);
         ItemMeta itemMeta = skipItem.getItemMeta();
 
-        TextComponent skipItemName = Component.text("Skip").color(NamedTextColor.RED);
+        TextComponent skipItemName = Component.text("Skip")
+                .color(NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD);
         itemMeta.displayName(skipItemName);
 
         NamespacedKey key = new NamespacedKey(plugin, "skip_item");
